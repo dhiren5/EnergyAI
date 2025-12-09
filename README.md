@@ -1,8 +1,16 @@
 # 🌟 EnergyAI Blockchain
 
+![License](https://img.shields.io/badge/license-MIT-blue.svg)
+![Contributions Welcome](https://img.shields.io/badge/contributions-welcome-brightgreen.svg)
+![Node Version](https://img.shields.io/badge/node-%3E%3D16.0.0-brightgreen.svg)
+![Status](https://img.shields.io/badge/status-active-success.svg)
+![Open Source](https://img.shields.io/badge/Open%20Source-%E2%9D%A4-red.svg)
+
 **Energy Token Blockchain for AI Computation and Compute Power**
 
 A futuristic blockchain implementation designed to tokenize energy consumption and incentivize sustainable AI computation. EnergyAI addresses the growing energy concerns around AI infrastructure by creating a transparent, efficient, and eco-friendly system for tracking and trading energy credits.
+
+> **🤝 We Welcome Public Contributions!** Check out our [Contributing Guide](./CONTRIBUTING.md) to get started.
 
 ---
 
@@ -266,6 +274,63 @@ blockchain.minePendingTransactions(minerAddress, {
 - **Chain Validation**: Continuous integrity checking
 - **Proof-of-Compute**: Prevents spam and ensures work
 
+### 🛡️ Production Security (NEW!)
+
+**⚠️ CRITICAL: Learn from the $55k Google Cloud incident!**
+
+We've implemented comprehensive security features to prevent accidental API key leaks and runaway cloud costs:
+
+#### Secret Management
+- ✅ **Google Cloud Secret Manager** integration
+- ✅ **AWS Secrets Manager / Parameter Store** support
+- ✅ **Azure Key Vault** integration
+- ✅ **Never commit secrets** to Git
+- ✅ **Runtime secret loading** from secure sources
+
+#### Budget Protection
+- ✅ **Daily and monthly spending limits**
+- ✅ **Automatic alerts** at configurable thresholds
+- ✅ **Emergency shutdown** when limits exceeded
+- ✅ **Real-time cost tracking**
+- ✅ **Budget status API** endpoint
+
+#### GitHub Security
+- ✅ **Secret scanning** configuration included
+- ✅ **Push protection** for leaked credentials
+- ✅ **Comprehensive .gitignore** patterns
+- ✅ **Custom secret patterns** detection
+
+### 📚 Security Documentation
+
+- **[SECURITY.md](./SECURITY.md)** - Complete security guide
+  - The $55k horror story and lessons learned
+  - Secret Manager setup (GCP, AWS, Azure)
+  - Budget alerts and hard caps
+  - GitHub secret scanning
+  - Key rotation strategies
+  - Emergency response procedures
+
+- **[QUICKSTART.md](./QUICKSTART.md)** - Quick setup guide
+  - Development environment setup
+  - Production deployment with Secret Manager
+  - Budget monitoring configuration
+
+### 🚨 Security Checklist
+
+Before deploying to production:
+
+- [ ] ✅ Using Secret Manager (not .env files)
+- [ ] ✅ Budget alerts configured in cloud provider
+- [ ] ✅ Hard spending caps enabled
+- [ ] ✅ GitHub secret scanning enabled
+- [ ] ✅ No hardcoded secrets in code
+- [ ] ✅ `.env` files in `.gitignore`
+- [ ] ✅ API keys rotated every 90 days
+- [ ] ✅ Monitoring and logging enabled
+- [ ] ✅ Read [SECURITY.md](./SECURITY.md) completely
+
+**Remember**: The $55k incident could have been prevented. Don't let it happen to you!
+
 ---
 
 ## 📊 Blockchain Statistics
@@ -397,27 +462,63 @@ Tests cover:
 
 ## 🤝 Contributing
 
-We welcome contributions! Areas of focus:
+**We Welcome Public Contributions!** 🎉
+
+EnergyAI Blockchain is an open-source project and we actively encourage contributions from the community. Whether you're fixing a bug, adding a feature, improving documentation, or sharing ideas, your contribution matters!
+
+### 📖 How to Contribute
+
+Please read our **[CONTRIBUTING.md](./CONTRIBUTING.md)** guide for detailed instructions on:
+- Setting up your development environment
+- Code style guidelines
+- Commit message conventions
+- Pull request process
+- Testing requirements
+
+### 🎯 Priority Areas for Contribution
 
 1. **Performance Optimization**
    - Faster mining algorithms
-   - Database integration
+   - Database integration (MongoDB, PostgreSQL)
    - Caching strategies
+   - Transaction pool management
 
 2. **Security Enhancements**
    - Penetration testing
    - Vulnerability audits
    - Key management improvements
+   - Security audits
 
 3. **Feature Development**
-   - Smart contracts
-   - P2P networking
-   - Mobile applications
+   - Smart contracts execution engine
+   - P2P networking implementation
+   - Mobile wallet applications
+   - Web dashboard and block explorer
 
-4. **Documentation**
+4. **Integration & APIs**
+   - Cloud provider APIs (AWS, Azure, GCP)
+   - IoT device integration
+   - Energy grid APIs
+   - AI framework plugins
+
+5. **Documentation**
    - API documentation
    - Tutorial videos
    - Use case studies
+   - Architecture diagrams
+
+### 🌟 First-Time Contributors
+
+New to open source? No problem! Look for issues labeled `good-first-issue` or `help-wanted`. We're here to help you get started!
+
+### 💬 Get Involved
+
+- **Report Bugs**: Found an issue? [Open a bug report](https://github.com/energyai/blockchain/issues)
+- **Suggest Features**: Have an idea? [Create a feature request](https://github.com/energyai/blockchain/issues)
+- **Ask Questions**: Join our Discord community or open a discussion
+- **Spread the Word**: Star ⭐ the repo and share with others!
+
+**Every contribution, no matter how small, helps build a sustainable future for AI!** 🚀
 
 ---
 

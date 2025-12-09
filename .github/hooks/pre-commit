@@ -1,0 +1,81 @@
+#!/bin/sh
+# Pre-commit hook to prevent committing secrets
+# Install: copy to .git/hooks/pre-commit and make executable
+
+echo "🔍 Scanning for secrets before commit..."
+
+# Colors
+RED='\033[0;31m'
+YELLOW='\033[1;33m'
+GREEN='\033[0;32m'
+NC='\033[0m' # No Color
+
+# Patterns to detect
+PATTERNS=(
+    "API[_-]?KEY"
+    "SECRET[_-]?KEY"
+    "PASSWORD"
+    "PRIVATE[_-]?KEY"
+    "-----BEGIN.*PRIVATE KEY-----"
+    "AIza[0-9A-Za-z_-]{35}"  # Google API Key
+    "AKIA[0-9A-Z]{16}"        # AWS Access Key
+    "sk_live_[0-9a-zA-Z]{24}" # Stripe Live Key
+    "xox[baprs]-[0-9]{10,12}-[0-9]{10,12}-[a-zA-Z0-9]{24,32}" # Slack Token
+)
+
+# Files to check
+FILES=$(git diff --cached --name-only --diff-filter=ACM)
+
+# Flag to track if secrets found
+SECRETS_FOUND=0
+
+# Check each file
+for FILE in $FILES; do
+    # Skip binary files
+    if file "$FILE" | grep -q "text"; then
+        # Check each pattern
+        for PATTERN in "${PATTERNS[@]}"; do
+            if grep -iE "$PATTERN" "$FILE" > /dev/null 2>&1; then
+                echo "${RED}❌ Potential secret found in: $FILE${NC}"
+                echo "${YELLOW}   Pattern: $PATTERN${NC}"
+                grep -inE "$PATTERN" "$FILE" | head -3
+                SECRETS_FOUND=1
+            fi
+        done
+    fi
+done
+
+# Check for .env files
+if echo "$FILES" | grep -E "\.env$|\.env\." > /dev/null; then
+    echo "${RED}❌ Attempting to commit .env file!${NC}"
+    echo "${YELLOW}   .env files should NEVER be committed${NC}"
+    SECRETS_FOUND=1
+fi
+
+# Check for key files
+if echo "$FILES" | grep -E "\.(key|pem|p12|pfx)$" > /dev/null; then
+    echo "${RED}❌ Attempting to commit key file!${NC}"
+    echo "${YELLOW}   Key files should NEVER be committed${NC}"
+    SECRETS_FOUND=1
+fi
+
+# If secrets found, abort commit
+if [ $SECRETS_FOUND -eq 1 ]; then
+    echo ""
+    echo "${RED}╔════════════════════════════════════════════════════════╗${NC}"
+    echo "${RED}║  COMMIT BLOCKED: Potential secrets detected!          ║${NC}"
+    echo "${RED}╚════════════════════════════════════════════════════════╝${NC}"
+    echo ""
+    echo "${YELLOW}What to do:${NC}"
+    echo "1. Remove the secrets from your code"
+    echo "2. Use Secret Manager instead (see SECURITY.md)"
+    echo "3. Add sensitive files to .gitignore"
+    echo "4. If this is a false positive, use: git commit --no-verify"
+    echo ""
+    echo "${YELLOW}⚠️  WARNING: The $55k incident started with a committed API key!${NC}"
+    echo ""
+    exit 1
+fi
+
+echo "${GREEN}✅ No secrets detected. Proceeding with commit.${NC}"
+exit 0

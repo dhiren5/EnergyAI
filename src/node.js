@@ -2,14 +2,73 @@ import express from 'express';
 import Blockchain from './core/Blockchain.js';
 import Transaction from './core/Transaction.js';
 import Wallet from './wallet/Wallet.js';
+import secretManager from './config/secrets.js';
+import BudgetMonitor from './config/budgetMonitor.js';
+import dotenv from 'dotenv';
+
+// Load environment variables (development only)
+dotenv.config();
 
 /**
  * EnergyAI Blockchain Node - REST API Server
  * Provides HTTP endpoints for blockchain interaction
+ * 
+ * Security Features:
+ * - Secret Manager integration (GCP, AWS, Azure)
+ * - Budget monitoring and alerts
+ * - Rate limiting
+ * - Request validation
  */
 
 const app = express();
 app.use(express.json());
+
+// Initialize budget monitor
+let budgetMonitor;
+let config;
+
+async function initializeServer() {
+    try {
+        // Load configuration from Secret Manager
+        config = await secretManager.getConfig();
+
+        // Initialize budget monitor
+        budgetMonitor = new BudgetMonitor({
+            maxDailySpend: config.maxDailySpend,
+            maxMonthlySpend: config.maxMonthlySpend,
+            alertThreshold: config.alertThreshold
+        });
+
+        // Listen for budget alerts
+        budgetMonitor.on('alert', (alert) => {
+            console.warn('💰 BUDGET ALERT:', alert.message);
+            // TODO: Send email/Slack notification
+        });
+
+        // Listen for emergency shutdown
+        budgetMonitor.on('shutdown', (shutdown) => {
+            console.error('🚨 EMERGENCY SHUTDOWN:', shutdown.message);
+            // TODO: Disable API endpoints, send notifications
+            process.exit(1);
+        });
+
+        console.log('✅ Secret Manager initialized');
+        console.log('✅ Budget Monitor initialized');
+
+    } catch (error) {
+        console.error('❌ Failed to initialize server:', error.message);
+        console.log('⚠️  Continuing with default configuration');
+
+        // Fallback to defaults
+        config = {
+            port: process.env.PORT || 3000,
+            maxDailySpend: 10,
+            maxMonthlySpend: 100
+        };
+
+        budgetMonitor = new BudgetMonitor(config);
+    }
+}
 
 const PORT = process.env.PORT || 3000;
 
@@ -22,8 +81,53 @@ console.log('🚀 Starting EnergyAI Blockchain Node...');
 console.log(`Node Address: ${nodeWallet.getWalletId()}\n`);
 
 // ============================================
+// MIDDLEWARE
+// ============================================
+
+/**
+ * Budget tracking middleware
+ * Records costs for each API call
+ */
+app.use((req, res, next) => {
+    if (budgetMonitor) {
+        // Estimate cost based on endpoint
+        const cost = budgetMonitor.estimateCost('api_call');
+
+        try {
+            budgetMonitor.recordCost(cost, req.path);
+        } catch (error) {
+            // Budget limit exceeded
+            return res.status(503).json({
+                success: false,
+                error: 'Service temporarily unavailable: Budget limit exceeded',
+                message: error.message
+            });
+        }
+    }
+    next();
+});
+
+// ============================================
 // API ENDPOINTS
 // ============================================
+
+/**
+ * GET /budget
+ * Get current budget status
+ */
+app.get('/budget', (req, res) => {
+    if (!budgetMonitor) {
+        return res.status(503).json({
+            success: false,
+            error: 'Budget monitor not initialized'
+        });
+    }
+
+    res.json({
+        success: true,
+        budget: budgetMonitor.getStatus()
+    });
+});
 
 /**
  * GET /blockchain
@@ -337,17 +441,36 @@ app.get('/', (req, res) => {
 });
 
 // Start server
-app.listen(PORT, () => {
-    console.log(`✅ EnergyAI Blockchain Node running on port ${PORT}`);
-    console.log(`📡 API endpoint: http://localhost:${PORT}`);
-    console.log(`🔗 Node ID: ${nodeWallet.getWalletId()}\n`);
-    console.log('Available endpoints:');
-    console.log(`   GET  http://localhost:${PORT}/`);
-    console.log(`   GET  http://localhost:${PORT}/stats`);
-    console.log(`   GET  http://localhost:${PORT}/blockchain`);
-    console.log(`   POST http://localhost:${PORT}/mine`);
-    console.log(`   POST http://localhost:${PORT}/energy/tokenize`);
-    console.log(`   ... and more!\n`);
+async function startServer() {
+    // Initialize security features
+    await initializeServer();
+
+    app.listen(PORT, () => {
+        console.log(`✅ EnergyAI Blockchain Node running on port ${PORT}`);
+        console.log(`📡 API endpoint: http://localhost:${PORT}`);
+        console.log(`🔗 Node ID: ${nodeWallet.getWalletId()}\n`);
+
+        console.log('🔐 Security Features:');
+        console.log(`   Secret Manager: ${config.secretProvider || 'env'}`);
+        console.log(`   Budget Monitor: Enabled`);
+        console.log(`   Daily Limit: $${budgetMonitor.maxDailySpend}`);
+        console.log(`   Monthly Limit: $${budgetMonitor.maxMonthlySpend}\n`);
+
+        console.log('Available endpoints:');
+        console.log(`   GET  http://localhost:${PORT}/`);
+        console.log(`   GET  http://localhost:${PORT}/stats`);
+        console.log(`   GET  http://localhost:${PORT}/budget`);
+        console.log(`   GET  http://localhost:${PORT}/blockchain`);
+        console.log(`   POST http://localhost:${PORT}/mine`);
+        console.log(`   POST http://localhost:${PORT}/energy/tokenize`);
+        console.log(`   ... and more!\n`);
+    });
+}
+
+// Start the server
+startServer().catch(error => {
+    console.error('Failed to start server:', error);
+    process.exit(1);
 });
 
 export default app;

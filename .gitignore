@@ -1,12 +1,90 @@
+# Dependencies
 node_modules/
-*.log
+package-lock.json
+
+# Environment Variables & Secrets
 .env
-.DS_Store
-wallets/
+.env.*
+!.env.example
+*.env
+.envrc
+
+# API Keys & Credentials
 *.key
 *.pem
+*.p12
+*.pfx
+*.cer
+*.crt
+*.der
+*.csr
+*-key.json
+service-account*.json
+credentials.json
+secrets.json
+config/secrets.json
+
+# Wallets & Private Keys
+wallets/
+*.wallet
+private-keys/
+keystore/
+
+# Build Output
 dist/
 build/
+out/
+.next/
+.nuxt/
+.cache/
+
+# Testing & Coverage
 coverage/
+.nyc_output/
+*.lcov
+test-results/
+
+# Logs
+*.log
+logs/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+lerna-debug.log*
+
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# IDE & Editor
 .vscode/
 .idea/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# Temporary Files
+tmp/
+temp/
+*.tmp
+*.bak
+*.backup
+
+# Database
+*.db
+*.sqlite
+*.sqlite3
+
+# Cloud Provider Configs
+.gcloud/
+.aws/
+.azure/
+
+# Sensitive Documentation
+PRIVATE*.md
+*-private.md
+internal-docs/
